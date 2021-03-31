@@ -18,13 +18,25 @@ public class BattleSystem : MonoBehaviour
     public BattleHUD playerHUD, enemyHUD;
 
     private bool critHit = false;
+
+    void Update()
+    {
     
+        //Close game
+        if(Input.GetButton("Cancel"))
+        {
+            Debug.Log("game closed");
+            Application.Quit();
+        }
+    }
 
     void Start()
     {
         currentState = GameState.START;
         StartCoroutine(SetUpBattle());
     }
+
+    
 
     IEnumerator SetUpBattle()
     {
