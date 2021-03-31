@@ -13,6 +13,8 @@ public class BattleSystem : MonoBehaviour
 
     public GameObject playerPrefab, enemyPrefab;
 
+    private ScreenShake shake;
+
     Unit playerUnit, enemyUnit;
 
     public BattleHUD playerHUD, enemyHUD;
@@ -34,6 +36,8 @@ public class BattleSystem : MonoBehaviour
     {
         currentState = GameState.START;
         StartCoroutine(SetUpBattle());
+
+        shake = GameObject.FindGameObjectWithTag("ScreenShake").GetComponent<ScreenShake>();
     }
 
     
@@ -63,10 +67,13 @@ public class BattleSystem : MonoBehaviour
     IEnumerator PlayerAttack()
     {
         //Deal damage to enemy
+        
         bool isDead = enemyUnit.TakeDamage(playerUnit.damage);
 
-        enemyHUD.setHP(enemyUnit.currentHP);
+        shake.cameraShake();
 
+        enemyHUD.setHP(enemyUnit.currentHP);
+        Debug.Log(enemyUnit.currentHP);
         yield return new WaitForSeconds(1f);
 
         //Check if enemy is dead
@@ -102,6 +109,7 @@ public class BattleSystem : MonoBehaviour
 
         enemyHUD.setHP(enemyUnit.currentHP);
 
+        Debug.Log(enemyUnit.currentHP);
         yield return new WaitForSeconds(1f);
 
         //Check if enemy is dead
@@ -177,7 +185,7 @@ public class BattleSystem : MonoBehaviour
             return;
         }
         else
-            StartCoroutine(PlayerAttack());
+        StartCoroutine(PlayerAttack());
     }
 
     public void HealButton()
