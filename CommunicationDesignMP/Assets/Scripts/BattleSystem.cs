@@ -13,7 +13,12 @@ public class BattleSystem : MonoBehaviour
 
     public GameObject playerPrefab, enemyPrefab;
 
+    //Screen effects
     private ScreenShake shake;
+    public GameObject enemyDeathEffect;
+    public GameObject playerDeathEffect;
+    public GameObject playerHealEffect;
+    //Screen effects ended
 
     Unit playerUnit, enemyUnit;
 
@@ -23,9 +28,9 @@ public class BattleSystem : MonoBehaviour
 
     void Update()
     {
-    
+
         //Close game
-        if(Input.GetButton("Cancel"))
+        if (Input.GetButton("Cancel"))
         {
             Debug.Log("game closed");
             Application.Quit();
@@ -40,7 +45,7 @@ public class BattleSystem : MonoBehaviour
         shake = GameObject.FindGameObjectWithTag("ScreenShake").GetComponent<ScreenShake>();
     }
 
-    
+
 
     IEnumerator SetUpBattle()
     {
@@ -53,7 +58,7 @@ public class BattleSystem : MonoBehaviour
         playerHUD.SetHUD(playerUnit);
         enemyHUD.SetHUD(enemyUnit);
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(.5f);
 
         currentState = GameState.PLAYER;
         PlayerTurn();
@@ -67,7 +72,7 @@ public class BattleSystem : MonoBehaviour
     IEnumerator PlayerAttack()
     {
         //Deal damage to enemy
-        
+
         bool isDead = enemyUnit.TakeDamage(playerUnit.damage);
 
         shake.cameraShake();
@@ -77,9 +82,12 @@ public class BattleSystem : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         //Check if enemy is dead
-        if(isDead)
+        if (isDead)
         {
             //End battle
+            enemyUnit.gameObject.SetActive(false);
+            Instantiate(enemyDeathEffect, new Vector3(6.5f, -2f, 0f), Quaternion.identity);
+
             currentState = GameState.WIN;
             EndGame();
         }
@@ -95,15 +103,16 @@ public class BattleSystem : MonoBehaviour
     {
         Randomizer(playerUnit.critAmount);
 
-        if(critHit == true)
+        if (critHit == true)
         {
-         enemyUnit.TakeDamage(playerUnit.damage + playerUnit.critModifier);
+            shake.cameraShake();
+            enemyUnit.TakeDamage(playerUnit.damage + playerUnit.critModifier);
         }
-        else if(critHit == false)
+        else if (critHit == false)
         {
-       enemyUnit.TakeDamage(0);
+            enemyUnit.TakeDamage(0);
         }
-        
+
         //Deal damage to enemy
         bool isDead = enemyUnit.TakeDamage(0);
 
@@ -116,6 +125,8 @@ public class BattleSystem : MonoBehaviour
         if (isDead)
         {
             //End battle
+            enemyUnit.gameObject.SetActive(false);
+            Instantiate(enemyDeathEffect, new Vector3(6.5f, -2f, 0f), Quaternion.identity);
             currentState = GameState.WIN;
             EndGame();
         }
@@ -132,7 +143,7 @@ public class BattleSystem : MonoBehaviour
 
 
         playerUnit.Heal(5);
-
+        Instantiate(playerHealEffect, new Vector3(-6.5f, -1.75f, 0), Quaternion.identity);
         playerHUD.setHP(playerUnit.currentHP);
 
         yield return new WaitForSeconds(1f);
@@ -142,12 +153,12 @@ public class BattleSystem : MonoBehaviour
 
     void EndGame()
     {
-        if(currentState == GameState.WIN)
+        if (currentState == GameState.WIN)
         {
             Debug.Log("You Win");
 
         }
-        else if(currentState == GameState.LOSS)
+        else if (currentState == GameState.LOSS)
         {
             Debug.Log("You Lost");
 
@@ -161,11 +172,14 @@ public class BattleSystem : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         bool isDead = playerUnit.TakeDamage(enemyUnit.damage);
+        shake.cameraShake();
 
         playerHUD.setHP(playerUnit.currentHP);
 
-        if(isDead)
+        if (isDead)
         {
+            playerUnit.gameObject.SetActive(false);
+            Instantiate(playerDeathEffect, new Vector3(-6.5f, -2f, 0f), Quaternion.identity);
             currentState = GameState.LOSS;
             EndGame();
         }
@@ -185,7 +199,7 @@ public class BattleSystem : MonoBehaviour
             return;
         }
         else
-        StartCoroutine(PlayerAttack());
+            StartCoroutine(PlayerAttack());
     }
 
     public void HealButton()
@@ -218,6 +232,6 @@ public class BattleSystem : MonoBehaviour
         }
         else
             critHit = false;
-        return(false);
+        return (false);
     }
 }
